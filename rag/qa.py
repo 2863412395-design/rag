@@ -1,6 +1,7 @@
 """RAG QA pipeline."""
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Iterable, List, Tuple
 
@@ -42,7 +43,17 @@ def answer_question(
     prompt = build_prompt(prompt_config)
     context = format_context(docs)
 
-    llm = ChatOpenAI(model=llm_config.model, temperature=llm_config.temperature)
+    base_url = os.getenv("OPENAI_BASE_URL")
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    model = os.getenv("LLM_MODEL", llm_config.model)
+    if base_url and "dashscope.aliyuncs.com" in base_url and not os.getenv("LLM_MODEL"):
+        model = "qwen-max"
+    llm = ChatOpenAI(
+        model=model,
+        temperature=llm_config.temperature,
+        api_key=api_key,
+        base_url=base_url,
+    )
     messages = prompt.format_messages(question=question, context=context)
     response = llm.invoke(messages)
     answer_text = response.content
