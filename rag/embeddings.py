@@ -28,10 +28,12 @@ def build_embeddings(config: EmbeddingsConfig | None = None) -> OpenAIEmbeddings
     model = os.getenv("EMBEDDING_MODEL", config.model)
     if provider == "deepseek":
         base_url = base_url or "https://api.deepseek.com"
-    if base_url and "dashscope.aliyuncs.com" in base_url and not os.getenv("EMBEDDING_MODEL"):
+    use_dashscope = bool(base_url and "dashscope.aliyuncs.com" in base_url)
+    if use_dashscope and not os.getenv("EMBEDDING_MODEL"):
         model = "text-embedding-v2"
     return OpenAIEmbeddings(
         model=model,
         api_key=api_key,
         base_url=base_url,
+        tiktoken_enabled=not use_dashscope,
     )
