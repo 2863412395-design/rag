@@ -31,9 +31,12 @@ def build_embeddings(config: EmbeddingsConfig | None = None) -> OpenAIEmbeddings
     use_dashscope = bool(base_url and "dashscope.aliyuncs.com" in base_url)
     if use_dashscope and not os.getenv("EMBEDDING_MODEL"):
         model = "text-embedding-v2"
+    tiktoken_model_name = os.getenv("TIKTOKEN_MODEL_NAME")
+    if use_dashscope and not tiktoken_model_name:
+        tiktoken_model_name = "cl100k_base"
     return OpenAIEmbeddings(
         model=model,
         api_key=api_key,
         base_url=base_url,
-        tiktoken_enabled=not use_dashscope,
+        tiktoken_model_name=tiktoken_model_name,
     )
