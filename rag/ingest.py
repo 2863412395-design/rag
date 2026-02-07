@@ -48,9 +48,12 @@ def load_documents_from_path(path: Path) -> List[Document]:
 
         docs = loader.load()
         for doc in docs:
-            doc.page_content = clean_text(doc.page_content)
+            content = clean_text(doc.page_content or "")
+            if not content.strip():
+                continue
+            doc.page_content = content
             doc.metadata.setdefault("source", str(file))
-        documents.extend(docs)
+            documents.append(doc)
 
     return documents
 
