@@ -68,8 +68,17 @@ def ingest(
 
     documents = load_documents_from_path(Path(input_path))
     chunks = split_documents(documents, chunk_config)
+    valid_chunks: List[Document] = []
+    for chunk in chunks:
+        if isinstance(chunk.page_content, bytes):
+            chunk.page_content = chunk.page_content.decode("utf-8", errors="ignore")
+        if not isinstance(chunk.page_content, str):
+            continue
+        if not chunk.page_content.strip():
+            continue
+        valid_chunks.append(chunk)
     store_config = store_config or VectorStoreConfig(persist_dir=persist_dir)
-    build_vectorstore(chunks, store_config)
+    build_vectorstore(valid_chunks, store_config)
 
 
 def main() -> None:
